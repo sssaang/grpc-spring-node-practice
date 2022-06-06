@@ -32,7 +32,7 @@ const { v4: uuidv4 } = require("uuid");
 app.get('/m/:message', async (req, res) => {
     const arr = []
 
-    for (let i=0; i<5000; i++) {
+    for (let i=0; i<3000; i++) {
         arr.push(client.sampleCall({userId: 1, message: req.params.message}, (err, data) => {
             if (err) throw err;
 
@@ -41,15 +41,33 @@ app.get('/m/:message', async (req, res) => {
     }
     resolveAll(arr, 'grpc')
 
-    for (let i=0; i<5000; i++) {
+    for (let i=0; i<3000; i++) {
         arr.push(axios.get('http://localhost:8880/hi/sang').catch((e) => {
             throw e
         }))
     }
 
-    resolveAll(arr, 'name')
+    resolveAll(arr, 'REST')
 
     res.send('Hello World')
+})
+
+app.get('/server-side/:message', async (req, res) => {
+    const { message } = req.params
+    const call = client.sampleServerStream({userId: 1, message}, (err, data) => {
+        console.log({err, data})
+        if (err) throw err;
+    })
+
+    call.on('data',function(res){
+        console.log(res.message);
+    });
+
+    call.on('end',function(){
+        console.log('closing');
+    });
+
+    res.send('server side')
 })
 
 async function resolveAll(arr, name) {
@@ -57,6 +75,7 @@ async function resolveAll(arr, name) {
     try {
         await Promise.all(arr)
     } catch(e) {
+        console.error('error handling ', name)
         console.error(e)
     }
     const end = new Date();

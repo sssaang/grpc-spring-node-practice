@@ -1,10 +1,10 @@
 package me.sssaang.grpcspring
 
-import org.lognet.springboot.grpc.GRpcService
 import io.grpc.stub.StreamObserver
 import me.sssaang.sample.Sample.SampleRequest
 import me.sssaang.sample.Sample.SampleResponse
 import me.sssaang.sample.SampleServiceGrpc.SampleServiceImplBase
+import org.lognet.springboot.grpc.GRpcService
 
 @GRpcService
 class Service: SampleServiceImplBase() {
@@ -21,6 +21,27 @@ class Service: SampleServiceImplBase() {
             .setMessage("message received ${request.message}")
             .build()
         responseObserver.onNext(res)
+        responseObserver.onCompleted()
+    }
+
+    override fun sampleServerStream(
+        request: SampleRequest,
+        responseObserver: StreamObserver<SampleResponse>
+    ) {
+        for (i in 1..5) {
+            val res: SampleResponse = SampleResponse
+                .newBuilder()
+                .setMessage("message streaming ${i}: ${request!!.message}")
+                .build()
+
+            responseObserver.onNext(res)
+            Thread.sleep(1_000)
+        }
+
+        responseObserver.onNext(SampleResponse
+            .newBuilder()
+            .setMessage("Finished!!!!")
+            .build())
         responseObserver.onCompleted()
     }
 

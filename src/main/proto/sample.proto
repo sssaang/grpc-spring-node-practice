@@ -13,4 +13,7 @@ message SampleResponse {
 
 service SampleService {
   rpc SampleCall (SampleRequest) returns (SampleResponse) {}
+  rpc SampleServerStream (SampleRequest) returns (stream SampleResponse) {}
+  rpc SampleClientStream (stream SampleRequest) returns (SampleResponse) {}
+  rpc SampleBidirectionalStream (stream SampleRequest) returns (stream SampleResponse) {}
 }
