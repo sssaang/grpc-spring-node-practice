@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package me.sssaang.sample;
+
+message SampleRequest {
+  string userId = 1;
+  string message = 2;
+}
+
+message SampleResponse {
+  string message = 1;
+}
+
+service SampleService {
+  rpc SampleCall (SampleRequest) returns (SampleResponse) {}
+}
