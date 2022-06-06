@@ -55,7 +55,6 @@ app.get('/m/:message', async (req, res) => {
 app.get('/server-side/:message', async (req, res) => {
     const { message } = req.params
     const call = client.sampleServerStream({userId: 1, message}, (err, data) => {
-        console.log({err, data})
         if (err) throw err;
     })
 
@@ -70,6 +69,25 @@ app.get('/server-side/:message', async (req, res) => {
     res.send('server side')
 })
 
+app.get('/client-side/:message', async (req, res) => {
+    const { message } = req.params
+    let call = client.sampleClientStream( (err, res) => {
+        if (err) throw err;
+        console.log("successfully streamed from client");
+        console.log("message from server: ", res.message);
+    });
+
+    let messages = ["message1", "message2", "message3"];
+    for (let i=0; i<messages.length; ++i) {
+        call.write({ userId: i, message:messages[i] });
+        await delay(1_000)
+    }
+
+    call.end();
+
+    res.send('client side')
+})
+
 async function resolveAll(arr, name) {
     const start = new Date();
     try {
@@ -80,6 +98,10 @@ async function resolveAll(arr, name) {
     }
     const end = new Date();
     console.log(`${name} took ${(end-start) / 1000}s`)
+}
+
+async function delay(time) {
+    return new Promise(resolve => setTimeout(resolve, time));
 }
 
 // start and listen on the Express server

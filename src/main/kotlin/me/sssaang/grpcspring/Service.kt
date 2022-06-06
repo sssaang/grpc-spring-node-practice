@@ -45,4 +45,27 @@ class Service: SampleServiceImplBase() {
         responseObserver.onCompleted()
     }
 
+    override fun sampleClientStream(responseObserver: StreamObserver<SampleResponse>): StreamObserver<SampleRequest> {
+        return object : StreamObserver<SampleRequest> {
+
+            override fun onNext(req: SampleRequest) {
+                println("message received from client stream ${req.message}")
+            }
+
+            override fun onCompleted() {
+                responseObserver.onNext(
+                    SampleResponse.newBuilder()
+                        .setMessage("Finished receiving client message")
+                        .build()
+                )
+                responseObserver.onCompleted()
+                println("finished client stream")
+            }
+
+            override fun onError(t: Throwable) {
+                throw t
+            }
+        }
+    }
+
 }
