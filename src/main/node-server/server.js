@@ -88,6 +88,30 @@ app.get('/client-side/:message', async (req, res) => {
     res.send('client side')
 })
 
+app.get('/bi/', async (req, res) => {
+    let call = client.sampleBidirectionalStream();
+
+    call.on('data',function(res){
+        console.log(`received from server: ${res.message}`);
+    });
+
+    call.on('end',function(){
+        console.log('closing from client');
+    });
+
+    let messages = ["message1", "message2", "message3"];
+
+    for (let i=0; i<messages.length; ++i) {
+        await delay(2_000)
+        console.log('client streaming', `${i} ${messages[i]}`)
+        call.write({ userId: i, message: `${i} ${messages[i]}` });
+    }
+
+
+    call.end();
+    res.send('bidirect stream')
+})
+
 async function resolveAll(arr, name) {
     const start = new Date();
     try {
